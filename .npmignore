@@ -1,0 +1,11 @@
+# Local-only artifacts. NOTE: never exclude files DLT needs at runtime —
+# py/dlt_office.ps1 is the Office COM bridge and MUST ship.
+*.bak*
+*.tmp
+*.log
+
+# tests are repo-only (run them from the profile dir, see README)
+tests/
+
+# local npm cache
+.npm-cache/

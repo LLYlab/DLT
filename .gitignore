@@ -1,0 +1,19 @@
+# dependencies / build output
+node_modules/
+dist/
+build/
+
+# local npm cache / logs (release scripts use --cache ./.npm-cache)
+.npm-cache/
+*.log
+
+# backups produced by DLT itself and by local edits
+*.bak*
+*.tmp
+
+# artifacts produced by DLT's own version snapshots
+.lval-versions/
+
+# OS / editor
+Thumbs.db
+.DS_Store

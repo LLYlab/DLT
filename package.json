@@ -1,0 +1,53 @@
+{
+  "name": "dlt",
+  "version": "0.2.0",
+  "description": "DLT (DeepSeek Light Tool) — DSH 永久插件：每轮对话的人民币消耗、右下角账户余额、PDF/Word/Excel 直接读写工具与右栏预览、硬编码的编译/运行环境表与直接执行程序的工具，并带一个「DLT 管理器」运行期总开关。Permanent DeepSeek Harness plugin: per-turn CNY cost, account balance, native PDF/Word/Excel read-write tools and right-sidebar previews, a hardcoded compiler/runtime environment registry, direct run/build tools, and a runtime master switch.",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "py",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "dsh": {
+    "client": {
+      "platform": "web"
+    }
+  },
+  "dependencies": {
+    "@deepseek-ai/dsh-tools": "^0.1.1-rc.2",
+    "@deepseek-ai/dsh-typert-protocol": "^0.1.1-rc.2",
+    "@deepseek-ai/schemastery": "^3.18.1"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "LLYlab"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LLYlab/DLT.git"
+  },
+  "bugs": {
+    "url": "https://github.com/LLYlab/DLT/issues"
+  },
+  "homepage": "https://github.com/LLYlab/DLT#readme",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "cordis",
+    "pdf",
+    "docx",
+    "xlsx",
+    "cost",
+    "balance",
+    "toolchain",
+    "msbuild"
+  ]
+}

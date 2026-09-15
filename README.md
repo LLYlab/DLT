@@ -1,10 +1,10 @@
 # DLT — DeepSeek Light Tool
 
-[![npm](https://img.shields.io/npm/v/dlt.svg)](https://www.npmjs.com/package/dlt) [![license](https://img.shields.io/npm/l/dlt.svg)](LICENSE)
+[![npm](https://img.shields.io/npm/v/dsh-light-tool.svg)](https://www.npmjs.com/package/dsh-light-tool) [![license](https://img.shields.io/npm/l/dsh-light-tool.svg)](LICENSE)
 
 DSH（DeepSeek Harness）的**永久插件**。装一次，重启后常驻，出现在「设置 → 插件清单」。
 
-- npm：**`dlt`** → <https://www.npmjs.com/package/dlt>
+- npm：**`dsh-light-tool`** → <https://www.npmjs.com/package/dsh-light-tool>
 - 仓库：<https://github.com/LLYlab/DLT>
 
 六个模块，每个都能在设置页或配置里单独关掉（见「运行期开关」）：
@@ -25,7 +25,7 @@ DSH（DeepSeek Harness）的**永久插件**。装一次，重启后常驻，出
 ### 从 npm 装（推荐）
 
 ```powershell
-dsh plugin --profile web add dlt
+dsh plugin --profile web add dsh-light-tool
 ```
 
 然后在 `C:\Users\L2959\.dsh\profiles\web\cordis.patch.yml` 里插一行，并**重启 DSH**：
@@ -33,7 +33,7 @@ dsh plugin --profile web add dlt
 ```yaml
 - insert:
     - id: dlt
-      name: 'dlt'
+      name: 'dsh-light-tool'
       config:
         defaultSolution: 'C:\path\to\your.sln'   # dlt_build 不传 target 时用它
 ```
@@ -61,7 +61,7 @@ foreach ($n in 'schemastery','dsh-typert-protocol','dsh-tools','dsh-llm','dsh-ut
 **第 1 步**：让 profile 能解析到 dlt 包
 
 ```powershell
-New-Item -ItemType Junction -Path "C:\Users\L2959\.dsh\profiles\node_modules\dlt" `
+New-Item -ItemType Junction -Path "C:\Users\L2959\.dsh\profiles\node_modules\dsh-light-tool" `
          -Target "C:\Users\L2959\.dsh\plugins\dlt"
 ```
 
@@ -70,7 +70,7 @@ New-Item -ItemType Junction -Path "C:\Users\L2959\.dsh\profiles\node_modules\dlt
 ```yaml
 - insert:
     - id: dlt
-      name: 'dlt'
+      name: 'dsh-light-tool'
       config:
         defaultSolution: 'C:\path\to\your.sln'   # dlt_build 不传 target 时用它
 ```
@@ -171,7 +171,7 @@ node C:\Users\L2959\.dsh\plugins\dlt\tests\switch.test.mjs
 ```
 
 第 3 套**必须从 profile 目录运行**：ESM 按导入方的真实路径解析裸包名，只有从 profile 里
-`import('dlt')` 才能用上 junction；而且它会真起 `cl.exe` / Office COM / 联网抓价，
+`import('dsh-light-tool')` 才能用上 junction；而且它会真起 `cl.exe` / Office COM / 联网抓价，
 **别在受限沙箱里跑**（子进程管道会被拦，报 `spawn EPERM`）。
 
 当前状态：doc-engine **22/22**，core **28/28**，host **29/29**（含运行期开关 6 条），switch **7/7**。

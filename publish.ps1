@@ -1,5 +1,5 @@
 # ====================================================================
-#  dlt — one-shot release script (GitHub + npm + Release)
+#  dsh-light-tool — one-shot release script (GitHub + npm + Release)
 #  ------------------------------------------------------------------
 #  Usage (run in a normal PowerShell, with gh + npm already authenticated):
 #    .\publish.ps1                    # bump patch, commit/tag, push, npm publish, gh release
@@ -86,6 +86,6 @@ if (-not $OnlyGit) {
 }
 
 Write-Host "`nDone:" -ForegroundColor Green
-Write-Host "  npm:    https://www.npmjs.com/package/dlt" -ForegroundColor Green
+Write-Host "  npm:    https://www.npmjs.com/package/dsh-light-tool" -ForegroundColor Green
 Write-Host "  GitHub: https://github.com/LLYlab/DLT" -ForegroundColor Green
 Write-Host "  Release: https://github.com/LLYlab/DLT/releases/tag/v$Version" -ForegroundColor Green

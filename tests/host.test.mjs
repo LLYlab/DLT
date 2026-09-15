@@ -7,14 +7,14 @@
 //     cd C:\Users\L2959\.dsh\profiles\web
 //     node C:\Users\L2959\.dsh\plugins\dlt\tests\host.test.mjs
 // 原因是 ESM 按导入方的**真实路径**解析裸包名，而 dlt 的真实路径在 plugins 下，
-// 只有从 profile 里导入 dlt 才能用上 junction。
+// 只有从 profile 里导入 dsh-light-tool 才能用上 junction。
 
 import { Context, Service } from '@deepseek-ai/cordis'
 import { existsSync, mkdirSync, rmSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import os from 'node:os'
 
-const dlt = await import('dlt')
+const dlt = await import('dsh-light-tool')
 
 const WORK = join(os.tmpdir(), 'dlt-host-test')
 rmSync(WORK, { recursive: true, force: true })

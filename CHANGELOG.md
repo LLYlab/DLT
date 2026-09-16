@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.1.0 — 环境表路径不再写死（自动探测 + 可配置覆盖）
+
+- **环境表路径改为「解析」而不是硬编码。** `resolveEnvironment()` 按 ① `config.environments` 的显式覆盖 → ② 自动探测 → ③ 内置默认值 的顺序落地。探测手段：**VS 安装根扫描**（认「根下有 `VC\Auxiliary\Build\vcvarsall.bat`」的那个，覆盖 VS2017–VS18 × Community/Professional/Enterprise/BuildTools/Preview）、`%ProgramFiles%` / `%ProgramFiles(x86)%` / `%SystemRoot%` / `%LOCALAPPDATA%` 展开、常见安装位置，以及 **PATH 查找**（按 `PATHEXT` 补扩展名）。于是换一台机器基本不用动源码。
+- **新增配置项 `environments`**：`{ [环境 id]: { program?, vcvars?, arch?, label?, vsRoot? } }`。不填也能用，只在「这台机器探测不准」或「就想指定某一个环境」时才需要。
+- **修掉一个必然会踩的坑**：VS 系的 `vcvars` / `program` 现在由**探测到的安装根推导**。原先表里写死指向 VS18 的那条路径，在装了 VS2022 的机器上会被原样拿去 `call` —— 探测到了新版本反而没用。另外**显式覆盖永远优先，即使那条路径并不存在**：这样报错会直接指出你给的那条路径，而不是被探测结果悄悄顶掉。
+- **`dlt_env` 的可用性判断**改用同一套解析结果，覆盖之后如实标 `missing`，不掩盖。
+- **新增回归测试 `tests/env-paths.test.mjs`（12 条）**：环境 id 集合稳定（18 个）；默认全部解析到真实存在的路径；覆盖 `program` / `vsRoot` / `arch` / `label` 均生效且 `describeEnvironments` 如实反映；覆盖一条不存在的「幽灵路径」不会被探测结果顶掉；清除覆盖后恢复 18/18 可用；非法配置值（`null` / 数组 / 字符串 / 数字）不炸；未知环境 id 仍报清晰错误。
+- 全量测试：doc-engine **22/22** · core **28/28** · host **29/29** · switch **7/7** · env-paths **12/12**。
+
 ## v1.0.0 — 可安装的 bundle（manifest 完整化）
 
 - **新增 `dsh.bundle.patch`**：`package.json` 的 `dsh` 节除 `client` 外，现在声明

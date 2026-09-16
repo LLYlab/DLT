@@ -15,7 +15,7 @@ DSH（DeepSeek Harness）的**永久插件**。装一次，重启后常驻，出
 | 2 | 账户余额 | 右下角常驻显示 DeepSeek 账户余额，可拖动、可点击强制刷新 |
 | 3 | 文档工具 | 让模型**直接读写** PDF / Word / Excel / CSV，不用再写脚本；PDF 支持「转 Word 改完转回来」的往返链 |
 | 4 | 右栏预览 | 点工作区里的 `.docx` / `.xlsx` / `.csv`，右栏直接看（PDF 由产品自带渲染器负责） |
-| 5 | 环境表 | 把本机编译/运行工具链的绝对路径写死，并注入系统提示，模型不再自己探测 |
+| 5 | 环境表 | 把「怎么进这条工具链」写清楚（VS 安装根 / Python / Office / Edge 等**自动探测**，可配置覆盖），并注入系统提示，模型不再自己探测 |
 | 6 | 直接执行 | `dlt_run` / `dlt_build`：按环境名直接跑程序、编译工程，不用拼 vcvarsall 命令行 |
 
 ---
@@ -119,6 +119,7 @@ node C:\Users\L2959\.dsh\plugins\dlt\tests\host.test.mjs
 | `enabled` | `true` | **总开关默认值**（只影响没有 `switch.json` 时；运行期开关见上一节） |
 | `cost` / `balance` / `documents` / `preview` / `environment` / `run` | `true` | 六个模块的开关默认值（同上） |
 | `pythonEnv` | `python312` | 文档引擎用的解释器（见环境表） |
+| `environments` | `{}` | 环境表路径覆盖：`{ [环境 id]: { program?, vcvars?, arch?, label?, vsRoot? } }`。**不填就能用** —— 解析顺序见文末实现要点 10 |
 | `cacheDir` | `<DSH_HOME>/dlt` | 定价与余额快照目录 |
 | `pricingMaxAgeMs` | `86400000` | 定价快照最长使用时间，超过就重抓官网 |
 | `balanceApiBase` | `https://api.deepseek.com` | 余额接口基址 |
@@ -132,7 +133,7 @@ node C:\Users\L2959\.dsh\plugins\dlt\tests\host.test.mjs
 
 ## 模型工具
 
-- **`dlt_env`** — 看环境表（`env=<id>` 看细节）。**注意**：环境表里的路径是硬编码的，换机器要改 `lib/core.js` 的 `ENVIRONMENTS`。
+- **`dlt_env`** — 看环境表（`env=<id>` 看细节）。路径会**自动探测**（VS 安装根扫描 / `%ProgramFiles%` / `%SystemRoot%` / PATH 查找），探测不到才退回内置默认值；要指定就配 `environments`（见「配置项」）。
 - **`dlt_run(env, program, args, cwd, timeoutMs, stdin)`** — 在指定环境里执行程序，回 stdout/stderr/退出码。`env=msvc-x64` 会先注入 vcvarsall，于是 `cl`/`link` 直接可用。
 - **`dlt_build(target?, configuration?, platform?, rebuild?)`** — MSBuild 一条龙。
 - **`dlt_doc_read(path, mode?, pages?, sheets?, range?, formulas?, maxRows?)`** — 读 PDF（逐页文本）/ Word（段落+表格）/ Excel（各表行列）/ CSV。
@@ -170,7 +171,7 @@ Office（Word/Excel COM 导出 PDF）与 Edge（HTML→PDF）都用本机已装�
 
 ## 测试
 
-四套，全部可重复运行：
+五套，全部可重复运行：
 
 ```powershell
 # 1) 文档引擎（Python CLI 层：创建/读取/编辑/渲染/转换/往返链）
@@ -185,17 +186,22 @@ node C:\Users\L2959\.dsh\plugins\dlt\tests\host.test.mjs
 
 # 4) 开关持久层（纯 Node，不用起 Cordis：默认值 / 合并 / 落盘读回 / 文件损坏降级）
 node C:\Users\L2959\.dsh\plugins\dlt\tests\switch.test.mjs
+
+# 5) 环境表路径解析（纯 Node：默认解析 / config 覆盖 / VS 安装根推导 / 覆盖清除）
+node C:\Users\L2959\.dsh\plugins\dlt\tests\env-paths.test.mjs
 ```
 
 第 3 套**必须从 profile 目录运行**：ESM 按导入方的真实路径解析裸包名，只有从 profile 里
 `import('dsh-light-tool')` 才能用上 junction；而且它会真起 `cl.exe` / Office COM / 联网抓价，
 **别在受限沙箱里跑**（子进程管道会被拦，报 `spawn EPERM`）。
 
-当前状态：doc-engine **22/22**，core **28/28**，host **29/29**（含运行期开关 6 条），switch **7/7**。
+当前状态：doc-engine **22/22**，core **28/28**，host **29/29**（含运行期开关 6 条），switch **7/7**，env-paths **12/12**。
 
 覆盖到的关键断言：flash/pro 六档单价与官网一致；高峰/空闲 9 个时间边界；
 1M 未命中 + 1M 输出 @ 空闲恰好 5 元；旧模型名映射到 flash；未结算轮次不编造数据；
-MSVC 真正编译出 exe 并运行；超时能杀掉进程树；PDF↔Word 与 PDF↔HTML 两条往返链的文本可验证。
+MSVC 真正编译出 exe 并运行；超时能杀掉进程树；PDF↔Word 与 PDF↔HTML 两条往返链的文本可验证；
+环境表 18 个环境全部解析到真实存在的路径，且 `config.environments` 的覆盖（只给 `vsRoot` 时
+`vcvars` 与 MSBuild 路径会一起跟着走）与清除都成立。
 
 ---
 
@@ -210,7 +216,7 @@ MSVC 真正编译出 exe 并运行；超时能杀掉进程树；PDF↔Word 与 P
 7. **`cacheWrite` 不单独计价**（官网没有缓存写入档），只报数并提示已按未命中输入口径计入。
 8. **`formulas=false` 读 Excel 缓存值**时，若文件是由 openpyxl 生成且从未被 Excel 打开过，公式单元格会返回 `null` —— 这是 openpyxl 的既有行为，不是 bug。
 9. **中文水印会嵌入约 1.7MB 的 CJK 字体**，所以水印字体按内容选择：纯 ASCII 用内置 `helv`，含中文才用 `china-s`。
-10. **改编译环境表**只需改 `lib/core.js` 顶部的 `ENVIRONMENTS`；`msvc` 类环境会自动生成一个临时 `.cmd`（`chcp 65001` + `call vcvarsall`）来注入环境，避免命令行转义地狱。
+10. **环境表的路径是「解析」出来的，不是照抄表里的值。** `resolveEnvironment()` 按 ① `config.environments` 的显式覆盖 → ② 自动探测（VS 安装根扫描 / `%ProgramFiles%` / `%SystemRoot%` / `%LOCALAPPDATA%` 展开 / PATH 查找）→ ③ `ENVIRONMENTS` 里那条默认值 的顺序落地。两个容易写错的地方：**(a) VS 系的 `vcvars`/`program` 必须由探测到的安装根推导**，不能沿用表里写死的 VS18 —— 否则在装了 VS2022 的机器上会拿着一条指向 VS18 的路径去 call；**(b) 显式覆盖永远优先，哪怕那条路径并不存在**，这样报错会直接指出用户给的那条路径，而不是被探测结果悄悄顶掉。`msvc` 类环境执行时会自动生成一个临时 `.cmd`（`chcp 65001` + `call vcvarsall`）来注入环境，避免命令行转义地狱。
 11. **相对路径按会话工作区解析。** 工具通过 `exec.agent.session.meta.cwd` 拿到当前会话的工作区根，所以模型写 `docs/a.docx` 能命中；预览端点则从 `dsh-resource://file/session/<sessionId>/<path>` 地址里取出 sessionId 再反查 cwd。绝对路径原样使用，没有会话信息才退回进程 cwd。
 12. **`dsh-token-meter` 不是 dlt 的依赖，是动态解析的。** 依次尝试：直接当包解析 → **从 `@deepseek-ai/cordis` 的位置推出同层的 `dsh-token-meter`** → `createRequire`。第二条是关键：它不依赖 dlt 自己的依赖声明，而且解析到的是同一个真实文件（Node 按 realpath 缓存模块），所以不会出现「两份 token-meter、两份状态」。
 13. **`ctx.plugin()` 返回的是 Fiber，不是 thenable。** `await ctx.plugin(...)` 不会等激活，必须 `await fiber.await()`；写测试时容易在这里踩空（表现为「插件好像没加载」）。同理 `ctx.get()` 返回的是 `getTraceable` 包过的代理，**不要用 `===` 比较身份**。
@@ -235,5 +241,6 @@ plugins/dlt/
   tests/core.test.mjs         # 核心层回归测试（含真编译、真抓价）
   tests/host.test.mjs         # Host 半区回归测试（真 Cordis 上下文装载 + 运行期开关）
   tests/switch.test.mjs       # 开关持久层单测
+  tests/env-paths.test.mjs    # 环境表路径解析单测（默认 / 覆盖 / VS 根推导 / 清除）
   node_modules/@deepseek-ai/* # 8 个 junction → profile 里同一版本的包（仅源码挂载方式需要，见安装第 0 步）
 ```

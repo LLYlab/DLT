@@ -1,0 +1,29 @@
+# DLT (DeepSeek Light Tool) — profile bundle patch.
+#
+# 这个文件由 package.json 的 `dsh.bundle.patch` 指向，安装时并入当前 profile 的
+# bundle 层（`dsh plugin --profile web add dsh-light-tool`）。loader entry 的
+# `name` 必须等于 npm 包名，否则 DSH 解析不到入口。
+#
+# 下面的 config 只提供**首次运行**的默认值：一旦在
+# 「设置 → DLT 管理器」里动过开关，就以 <DSH_HOME>/dlt/switch.json 为准，
+# 这里的值不会覆盖用户在 UI 上的选择。所有键在 Config schema 里都有默认值，
+# 因此这一节整体可以删掉而仍然可用。
+- insert:
+    - id: dlt
+      name: 'dsh-light-tool'
+      config:
+        # 总开关 + 六个模块开关（默认全开）。
+        # 关掉哪个，对应的模型工具/界面元素会在下一次装载时撤下。
+        enabled: true
+        cost: true
+        balance: true
+        documents: true
+        preview: true
+        environment: true
+        run: true
+        # 文档引擎使用的 Python 环境名（见 README 的环境表）。
+        pythonEnv: python312
+        # dlt_build 不传 target 时使用的解决方案；留空则必须显式传 target。
+        defaultSolution: ''
+        defaultConfiguration: Debug
+        defaultPlatform: x64

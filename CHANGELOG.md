@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.0.0 — 可安装的 bundle（manifest 完整化）
+
+- **新增 `dsh.bundle.patch`**：`package.json` 的 `dsh` 节除 `client` 外，现在声明
+  `bundle.patch → ./cordis.patch.yml`，并在仓库根补上了对应的 `cordis.patch.yml`。
+  在此之前 DLT 只声明 `dsh.client`，而**单有 `dsh.client` 并不构成可安装的 bundle**：
+  `dsh plugin add` 装不上，各插件收录库的静态校验也会直接判 `invalid`
+  —— 中心 Registry 的 `rejected.json` 里 DLT 的理由正是
+  `package.json does not declare a safe dsh.bundle.patch`。
+- **一条命令安装**：`dsh plugin --profile web add dsh-light-tool` 或
+  `dsh plugin --profile web add github:LLYlab/DLT`。装完自动并入当前 profile 的 bundle 层，
+  **不再需要手工往 `cordis.patch.yml` 里插 `insert` 块**。
+- **README**：补 GitHub 安装方式、钉 commit 的写法，以及「按 id 覆盖 config（整块替换）」的说明。
+- `cordis.patch.yml` 里的 `config` 只作为**首次运行的默认值**；运行期开关仍以
+  `<DSH_HOME>/dlt/switch.json` 为准（见 v0.2.0），patch 不会覆盖 UI 上的选择。
+- **功能无变化**：六个模块与 v0.2.0 完全一致，本次是打包／安装契约的修复。
+
 ## v0.2.0 — 运行期总开关（设置 → DLT 管理器）
 
 - **新增「DLT 管理器」设置页**：一个**总开关** + 六个**分模块开关**（每轮成本 / 账户余额 / 文档工具 / 右栏预览 / 环境表 / 执行与编译）。开关**即时生效、持久化、无需重启**。

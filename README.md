@@ -22,21 +22,38 @@ DSH（DeepSeek Harness）的**永久插件**。装一次，重启后常驻，出
 
 ## 安装（已经装好的话跳过）
 
+DLT 在 `package.json` 里声明了 **`dsh.bundle.patch`**（→ [`cordis.patch.yml`](./cordis.patch.yml)），
+所以装完会自动并进当前 profile 的 bundle 层，**不需要手工改 `cordis.patch.yml`**。
+
 ### 从 npm 装（推荐）
 
 ```powershell
 dsh plugin --profile web add dsh-light-tool
 ```
 
-然后在 `C:\Users\L2959\.dsh\profiles\web\cordis.patch.yml` 里插一行，并**重启 DSH**：
+### 从 GitHub 装
+
+```powershell
+dsh plugin --profile web add github:LLYlab/DLT
+```
+
+想钉住某个 commit（更稳，推荐）：`dsh plugin --profile web add github:LLYlab/DLT#<commit-sha>`。
+
+两种装法都读包里的 bundle patch，装完**重启 DSH** 即常驻，出现在「设置 → 插件清单」。
+
+### 改默认配置
+
+要改默认值（比如 `dlt_build` 不传 target 时用的解决方案），在自己的 patch 层里按 **id** 覆盖：
 
 ```yaml
-- insert:
-    - id: dlt
-      name: 'dsh-light-tool'
-      config:
-        defaultSolution: 'C:\path\to\your.sln'   # dlt_build 不传 target 时用它
+- id: dlt
+  config:
+    defaultSolution: 'C:\path\to\your.sln'
 ```
+
+> ⚠️ 覆盖是**整块替换**，不是逐字段深合并——`config` 里要写全你想生效的键，
+> 没写的会回到 schema 默认值（完整键表见下面「配置项」）。
+> 也不要再 `insert` 一个同名 `dlt` 行，否则是重复的 Bundle ID。
 
 > 文档引擎依赖本机 Python 3.12 与几个包，见文末「依赖」；Office COM / Edge 用本机已装的程序。
 

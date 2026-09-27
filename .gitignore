@@ -17,3 +17,7 @@ build/
 # OS / editor
 Thumbs.db
 .DS_Store
+
+# local PPT render checks (chk-*/fin-*/v2-* slide PNGs): QA artifacts, not source.
+# publish.ps1 does `git add -A`, so without this they would land in the public repo.
+rain-ppt/

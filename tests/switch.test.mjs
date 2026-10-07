@@ -99,8 +99,8 @@ await check('文件损坏 → 退回默认值 + 带原因（不抛）', async ()
 })
 
 await check('MODULE_KEYS 与 UI 顺序一致', () => {
-  assert(MODULE_KEYS.length === 6, '模块数应为 6')
-  assert(MODULE_KEYS.join(',') === 'cost,balance,documents,preview,environment,run', '顺序变了: ' + MODULE_KEYS.join(','))
+  assert(MODULE_KEYS.length === 7, '模块数应为 7')
+  assert(MODULE_KEYS.join(',') === 'cost,balance,documents,preview,environment,run,draft', '顺序变了: ' + MODULE_KEYS.join(','))
   return MODULE_KEYS.join('/')
 })
 

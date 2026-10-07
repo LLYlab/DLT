@@ -1,7 +1,7 @@
 {
   "name": "dsh-light-tool",
-  "version": "1.2.0",
-  "description": "DLT (DeepSeek Light Tool) — DSH 永久插件：每轮对话的人民币消耗、右下角账户余额、PDF/Word/Excel 直接读写工具与右栏预览、硬编码的编译/运行环境表与直接执行程序的工具，并带一个「DLT 管理器」运行期总开关。Permanent DeepSeek Harness plugin: per-turn CNY cost, account balance, native PDF/Word/Excel read-write tools and right-sidebar previews, a hardcoded compiler/runtime environment registry, direct run/build tools, and a runtime master switch.",
+  "version": "1.3.0",
+  "description": "DLT (DeepSeek Light Tool) — DSH 永久插件：每轮对话的人民币消耗、右下角账户余额、PDF/Word/Excel 直接读写工具与右栏预览、硬编码的编译/运行环境表与直接执行程序的工具、输入框旁的草图按钮（现画一张 → 图片附件或 PNG 路径），并带一个「DLT 管理器」运行期总开关；被 DET 全量接管时整体停摆。Permanent DeepSeek Harness plugin: per-turn CNY cost, account balance, native PDF/Word/Excel read-write tools and right-sidebar previews, a hardcoded compiler/runtime environment registry, direct run/build tools, an inline sketch button (draw → image attachment or PNG path), and a runtime master switch; steps aside entirely while DET takes over.",
   "type": "module",
   "main": "lib/index.js",
   "exports": {
@@ -26,8 +26,8 @@
     }
   },
   "dependencies": {
-    "@deepseek-ai/dsh-tools": "^0.1.7-rc.2",
-    "@deepseek-ai/dsh-typert-protocol": "^0.1.7-rc.2",
+    "@deepseek-ai/dsh-tools": "^0.2.0-rc.2",
+    "@deepseek-ai/dsh-typert-protocol": "^0.2.0-rc.2",
     "@deepseek-ai/schemastery": "^3.18.1"
   },
   "license": "MIT",

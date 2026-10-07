@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.3.0 — 草图（draft）；被 DET 全面接管时整体停摆
+
+- **依赖对齐 DSH 0.2**：`@deepseek-ai/dsh-tools` / `@deepseek-ai/dsh-typert-protocol` 由 `^0.1.7-rc.2` 抬到 `^0.2.0-rc.2`。caret 在 0.x 上锁次版本，`^0.1.7-rc.2` 根本不含 0.2，不抬的话干净环境解析不到、插件管理也会判成不兼容；`@deepseek-ai/schemastery` 保持 `^3.18.1`（0.2 带的是 3.18.4，落在范围内）。代码本身无需适配 —— 0.2.0-rc.2 下 6 个测试文件全绿（core 28 / doc-engine 22 / host 29 / env-paths 12 / switch 7 / client-load），升级后的真实宿主里工具、端点、客户端槽也已实测可用。
+- **新增第 7 个模块「草图导入」（`draft`）**：输入框「+」旁边多了一个小铅笔按钮（挂 `conversation.input.left`），点开是一块画布 —— 选颜色/线宽、撤销、清空，画完点「导入」：
+  - 当前会话的模型**声明了图片输入**（`inputModalities` 含 `image`）→ 草图作为**图片附件**挂进输入框（`conversation.createDrafts` + `shell.addAttachments`），随消息一起发给视觉模型；
+  - 否则（纯文本模型）→ 草图存成 PNG 并把**工作区相对路径**插进输入框文字（`.dsh-drafts/sketch-*.png`），切到视觉模型后模型可用 `read_image` 看它；
+  - 判据由 Host 回答（新端点 **`draftSupport`**），客户端不猜 —— 免得「挂上去了、发送时才被宿主以 `MODEL_DOES_NOT_SUPPORT_IMAGES` 拒绝」。两条路都会先调新端点 **`draftSave`** 把 PNG 落成真实文件（PNG 魔数校验 + 默认 `<会话工作区>/.dsh-drafts`，没有工作区时退到 `<DSH_HOME>/dlt/drafts`），所以草图总有一份可复用的实体。
+  - 画布 960×600（57.6 万像素，落在视觉模型的图片像素预算内）；弹窗用 portal 挂到 `body`，不受输入框 `overflow` 裁切。
+- **被 DET 全面接管时 DLT 整体停摆（新增「DET 全量接管」这一档声明）**：DET 的 `subordinateGrants()` 现在会回 `grants.dlt === true`，含义是「DET 已经把 DLT 的全部功能（六个 `dlt_*` 工具 / 系统提示 / 成本小签 / 右栏预览 / 草图）搬进自己」，于是 DLT：
+  - **宿主侧**：`dlt_env` / `dlt_run` / `dlt_build` / `dlt_doc_read` / `dlt_doc_write` / `dlt_doc_convert` 与系统提示段落**一个都不注册**（否则两边会撞同名工具）；
+  - **客户端**：成本小签、余额卡、草图按钮、右栏预览，连同**「DLT 管理器」设置页入口**一起撤下 —— DET 的「设置 → DET 管理器 → DLT 集成」成为唯一入口；
+  - 判断放在启动时 + 每 **5 秒**复核一次（`det.subordinate` 关掉、DET 总开关关掉、DET 卸载，任一条发生都会让 DLT 立刻恢复自管，不用重启也不用刷新）；
+  - 注册同名工具失败时**只跳过那一件并登记冲突**（不把整个插件带崩），配合 DET 侧的重试，启动瞬间的撞名窗口能自愈。
+- **新增回归测试 `tests/client-load.test.mjs`（31 条）**：客户端半区此前零覆盖。这套在假 ModuleLoader + 假 `require` + 假 ctx 下真跑 `factory` 与 `apply(ctx)`，逐个场景核对「此刻到底挂着什么」：全开五块界面都在；`detTakeover=true` 时连设置页入口都不挂；只关 `draft` 时其余照旧；总开关关闭时只留管理端点。
+- 全量测试：doc-engine **22/22** · core **28/28** · host **18/29**（11 条失败全部是本机 pwsh 沙箱不给子进程管道的 `spawn EPERM`，与代码无关；经 `dlt_run` 起的外层进程里跑则全绿）· switch **7/7** · env-paths **12/12** · client-load **31/31**。
+
 ## v1.1.0 — 环境表路径不再写死（自动探测 + 可配置覆盖）
 
 - **环境表路径改为「解析」而不是硬编码。** `resolveEnvironment()` 按 ① `config.environments` 的显式覆盖 → ② 自动探测 → ③ 内置默认值 的顺序落地。探测手段：**VS 安装根扫描**（认「根下有 `VC\Auxiliary\Build\vcvarsall.bat`」的那个，覆盖 VS2017–VS18 × Community/Professional/Enterprise/BuildTools/Preview）、`%ProgramFiles%` / `%ProgramFiles(x86)%` / `%SystemRoot%` / `%LOCALAPPDATA%` 展开、常见安装位置，以及 **PATH 查找**（按 `PATHEXT` 补扩展名）。于是换一台机器基本不用动源码。
